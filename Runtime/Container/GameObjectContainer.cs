@@ -1,53 +1,47 @@
+using FTGAMEStudio.InitialFramework.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace FTGAMEStudio.InitialSolution.Prefabbing
 {
     [Serializable]
-    public class GameObjectContainer : ObjectContainer<GameObject>
+    public class GameObjectContainer : ObjectContainer<GameObject>, IEngineContainer<GameObject>
     {
+        public EngineContainer[] engines;
+        public MonoContainer[] monos;
+
+        [Space]
+        [SerializeReference] public List<GameObjectContainer> child = new();
+
         /// <summary>
         /// 最后一次 <see cref="Credited(GameObject)"/> 或 <see cref="Fetched(GameObject)"/> 的 <see cref="GameObject"/>。
         /// </summary>
         public GameObject Target { get; private set; }
 
-        public TransformContainer transform;
-        public MonoContainer[] monos;
-
-        [Space]
-        [SerializeField] private bool hasRigidbody;
-        public RigidbodyContainer rigidbody;
-
-        public bool HasRigidbody => hasRigidbody;
-
+        public GameObjectContainer(GameObject target, InquiryMachine<string, Type> containerTypes) => Credited(target, containerTypes);
         public GameObjectContainer(GameObject target) : base(target) { }
 
-        public override void Credited(GameObject target)
+        public void Credited(GameObject target, InquiryMachine<string, Type> containerTypes)
         {
             Target = target;
 
             name = target.name;
 
-            transform = new(target.transform);
-            monos = PrefabbingPipeline.MonosToContainers(target);
-
-            hasRigidbody = target.TryGetComponent(out Rigidbody rigidbody);
-            if (hasRigidbody) this.rigidbody = new(rigidbody);
+            engines = PrefabbingPipeline.EnginesContainerMacro(target, containerTypes);
+            monos = PrefabbingPipeline.CreditedMacro(target);
         }
 
-        public override void Fetched(GameObject target)
+        public void Fetched(GameObject target, InquiryMachine<string, Type> containerTypes)
         {
             Target = target;
-
             target.name = name;
 
-            transform.Fetched(target.transform);
+            PrefabbingPipeline.ContainersToEngines(target, engines, containerTypes);
             PrefabbingPipeline.ContainersToMonos(target, monos);
-
-            if (!hasRigidbody) return;
-            if (!target.TryGetComponent(out Rigidbody rigidbody)) return;
-
-            this.rigidbody.Fetched(rigidbody);
         }
+
+        public override void Credited(GameObject target) => Credited(target, PrefabbingPipeline.builtinEngineConts);
+        public override void Fetched(GameObject target) => Fetched(target, PrefabbingPipeline.builtinEngineConts);
     }
 }

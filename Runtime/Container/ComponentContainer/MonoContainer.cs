@@ -8,11 +8,8 @@ namespace FTGAMEStudio.InitialSolution.Prefabbing
     /// ∏®÷˙¿‡£¨”√”⁄¥¢¥Ê <see cref="MonoBehaviour"/>°£
     /// </summary>
     [Serializable]
-    public class MonoContainer : ObjectContainer<MonoBehaviour>
+    public class MonoContainer : ComponentContainer<MonoBehaviour>
     {
-        public string uniqueName;
-        [TextArea(4, 16)] public string data;
-
         public MonoContainer(MonoBehaviour mono) : base(mono) { }
 
         public override void Credited(MonoBehaviour target)

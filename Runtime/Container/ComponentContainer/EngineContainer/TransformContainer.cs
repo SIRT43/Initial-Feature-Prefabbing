@@ -8,7 +8,7 @@ namespace FTGAMEStudio.InitialSolution.Prefabbing
     /// ∏®÷˙¿‡£¨”√”⁄¥¢¥Ê <see cref="Transform"/>°£
     /// </summary>
     [MapContainer(typeof(Transform)), Serializable]
-    public class TransformContainer : ObjectContainer<Transform>
+    public class TransformContainer : EngineContainer<Transform>
     {
         public Vector3 position;
         public Vector3 eulerAngles;
