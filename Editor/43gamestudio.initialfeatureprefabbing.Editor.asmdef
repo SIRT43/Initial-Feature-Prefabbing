@@ -1,0 +1,19 @@
+{
+    "name": "43GAMEStudio.InitialFeature.Prefabbing.Editor",
+    "rootNamespace": "FTGAMEStudio.InitialSolution",
+    "references": [
+        "GUID:906de70ae276d604096043ac32d39526",
+        "GUID:93bb0fd7cf677f8438c48e44e0aa64e2",
+        "GUID:5f4eb5fd6d7b8d54888393a402f48526",
+        "GUID:a7221d2f44d1fdd4f9adfbd14b1947d7"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
