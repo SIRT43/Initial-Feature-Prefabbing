@@ -5,12 +5,12 @@ using UnityEngine;
 namespace FTGAMEStudio.InitialSolution.Prefabbing
 {
     /// <summary>
-    /// 辅助类，用于储存 <see cref="MonoBehaviour"/>。
+    /// <see cref="MonoBehaviour"/> 表达基类，用于储存对象信息或覆盖对象信息。
     /// </summary>
     [Serializable]
-    public class MonoContainer : ComponentContainer<MonoBehaviour>
+    public class MonoInfo : ComponentExpression<MonoBehaviour>
     {
-        public MonoContainer(MonoBehaviour mono) : base(mono) { }
+        public MonoInfo(MonoBehaviour mono) : base(mono) { }
 
         public override void Credited(MonoBehaviour target)
         {

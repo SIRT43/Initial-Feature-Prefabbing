@@ -1,108 +1,112 @@
+using FTGAMEStudio.InitialFramework.Collections.Generic;
 using FTGAMEStudio.InitialFramework.IO;
 using FTGAMEStudio.InitialFramework.Replicator;
 using FTGAMEStudio.InitialSolution.Persistence;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace FTGAMEStudio.InitialSolution.Prefabbing
 {
-    public interface IPrefaber : IGameObjectReplicator
+    public interface IPrefaber
     {
-        /// <summary>
-        /// 将所有子对象储存到 <see cref="Prefab"/>。
-        /// </summary>
-        public void ToPrefab();
-        /// <summary>
-        /// 加载 <see cref="Prefab"/> 的对象。
-        /// 
-        /// <para>请注意，本方法会先调用 Read 方法。</para>
-        /// </summary>
-        public void LoadPrefab();
-
-        /// <summary>
-        /// 本方法将在对象实例化后持久化对象。
-        /// </summary>
-        public GameObject SingleInstantiate();
-        public GameObject[] MultipleInstantiate(int count);
-
-        /// <summary>
-        /// 销毁对象与持久化数据。
-        /// 
-        /// <para>如果您直接使用 <see cref="Object.Destroy(Object)"/> 销毁 <see cref="GameObject"/> 那么它的持久化数据不会被移除，它将在下一个加载时机被实例化。</para>
-        /// </summary>
-        public void DestroyInstantiate(GameObjectContainer target);
+        public GameObjectInfo Instantiate(InquiryMachine<string, Type> containerTypes);
+        public GameObjectInfo Instantiate();
     }
 
     [AddComponentMenu("Initial Solution/Prefabbing/Prefaber")]
-    public class Prefaber : MonoBehaviour, IPersistableObject, IPrefaber
+    public class Prefaber : MonoBehaviour, IPrefabbing, IPersistableObject, IPrefaber
     {
-        public Prefab data;
-        public GameObject original;
+        public GameObjectReplicator replicator;
+        public Prefabs prefabs;
+
+        [SerializeField] private bool deepOperation = false;
+        public bool DeepOperation { get => deepOperation; set => deepOperation = value; }
 
 
-        public virtual GameObject SingleObject() => Instantiate(original, transform);
-
-        public virtual GameObject[] MultipleObject(int count)
+        /// <summary>
+        /// 获取调用 <see cref="GameObjectReplicator.SingleObject"/> 的 <see cref="GameObjectInfo"/> 并 <see cref="Write"/>。
+        /// </summary>
+        public virtual GameObjectInfo Instantiate(InquiryMachine<string, Type> containerTypes)
         {
-            List<GameObject> gameObjects = new();
+            GameObject gameObject = replicator.SingleObject();
 
-            for (int current = 0; current < count; current++) gameObjects.Add(SingleObject());
+            GameObjectInfo gameObjectInfo = DeepOperation ?
+                PrefabbingPipeline.DeepGetGameObjectInfo(gameObject, containerTypes)
+                :
+                new(gameObject, containerTypes);
 
-            return gameObjects.ToArray();
+            prefabs.gameObjects.Add(gameObjectInfo);
+            Write();
+
+            return gameObjectInfo;
         }
 
 
-        public virtual void ToPrefab()
+        /// <summary>
+        /// 序列化 <see cref="GameObjectInfo"/> 并 <see cref="Write"/>。
+        /// </summary>
+        public virtual void Enprefab(InquiryMachine<string, Type> containerTypes)
         {
-            data.gameObjects = new(PrefabbingPipeline.ChildToContainers(gameObject));
-            data.Write();
+            if (replicator.Parent == null)
+                throw new NullReferenceException("Enprefab could not be made because the root transform in replicator could not be found.");
+
+            List<GameObjectInfo> infos = new();
+
+            foreach (Transform child in replicator.Parent)
+            {
+                GameObjectInfo gameObjectInfo = DeepOperation ?
+                    PrefabbingPipeline.DeepGetGameObjectInfo(child.gameObject, containerTypes)
+                    :
+                    new(child.gameObject, containerTypes);
+
+                infos.Add(gameObjectInfo);
+            }
+
+            prefabs.gameObjects = infos;
+
+            Write();
         }
 
-        public virtual void LoadPrefab()
+        /// <summary>
+        /// <see cref="Read"/> 并反序列化 <see cref="GameObjectInfo"/>。
+        /// </summary>
+        public virtual void Deprefab(InquiryMachine<string, Type> containerTypes)
         {
-            data.Read();
+            if (replicator.Parent == null)
+                throw new NullReferenceException("Deprefab could not be made because the root transform in replicator could not be found.");
 
-            if (transform.childCount < data.gameObjects.Count) MultipleObject(data.gameObjects.Count - transform.childCount);
 
-            PrefabbingPipeline.ContainersToChild(gameObject, data.gameObjects.ToArray());
-        }
+            Read();
 
-        public virtual GameObject SingleInstantiate()
-        {
-            GameObject gameObject = SingleObject();
-            data.gameObjects.Add(new(gameObject));
+            int dap = prefabs.gameObjects.Count - replicator.Parent.childCount;
+            if (dap > 0) replicator.MultipleObject(dap);
 
-            data.Write();
 
-            return gameObject;
-        }
+            for (int index = 0; index < prefabs.gameObjects.Count; index++)
+            {
+                GameObject gameObject = replicator.Parent.GetChild(index).gameObject;
 
-        public virtual GameObject[] MultipleInstantiate(int count)
-        {
-            List<GameObject> gameObjects = new();
-
-            for (int current = 0; current < count; current++) gameObjects.Add(SingleInstantiate());
-
-            return gameObjects.ToArray();
-        }
-
-        public virtual void DestroyInstantiate(GameObjectContainer target)
-        {
-            Destroy(target.Target);
-            data.gameObjects.Remove(target);
-
-            data.Write();
+                if (DeepOperation) PrefabbingPipeline.DeepFetchedGameObjectInfo(gameObject, prefabs.gameObjects[index], containerTypes);
+                else prefabs.gameObjects[index].Fetched(gameObject, containerTypes);
+            }
         }
 
 
+        public virtual GameObjectInfo Instantiate() => Instantiate(EngineProcessing.builtinEngineConts);
+        public virtual void Enprefab() => Enprefab(EngineProcessing.builtinEngineConts);
+        public virtual void Deprefab() => Deprefab(EngineProcessing.builtinEngineConts);
 
-        public FilePath FileLocation => data.FileLocation;
 
-        public bool Read() => data.Read();
-        public bool Write() => data.Write();
-        public bool Delete() => data.Delete();
+
+        public virtual UnityFile FileLocation => prefabs.FileLocation;
+
+        public virtual bool Read() => prefabs.Read();
+        public virtual void Write() => prefabs.Write();
+        public virtual bool Delete() => prefabs.Delete();
+
 #if UNITY_EDITOR
-        public void DisplayInExplorer() => data.DisplayInExplorer();
+        public virtual void DisplayInExplorer() => prefabs.DisplayInExplorer();
 #endif
     }
 }

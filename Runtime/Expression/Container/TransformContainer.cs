@@ -4,9 +4,6 @@ using UnityEngine;
 
 namespace FTGAMEStudio.InitialSolution.Prefabbing
 {
-    /// <summary>
-    /// ¸¨ÖúÀà£¬ÓÃÓÚ´¢´æ <see cref="Transform"/>¡£
-    /// </summary>
     [MapContainer(typeof(Transform)), Serializable]
     public class TransformContainer : EngineContainer<Transform>
     {

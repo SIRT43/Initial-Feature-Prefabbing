@@ -2,7 +2,7 @@
   "name": "com.43gamestudio.initialfeatureprefabbing",
   "version": "1.0.0",
   "displayName": "Initial Feature - Prefabbing",
-  "description": "\u6e38\u620f\u5bf9\u8c61\u6301\u4e45\u5316\u5de5\u5177\uff0c\u57fa\u4e8e Initial Feature - Persistence\u3002\n\u5b83\u63d0\u4f9b\u4e86\u8fd0\u884c\u65f6\u6301\u4e45\u5316\u6e38\u620f\u5bf9\u8c61\u72b6\u6001\u7684\u529f\u80fd\u3002",
+  "description": "GameObject \u6301\u4e45\u5316\u5de5\u5177\uff0c\u57fa\u4e8e Initial Feature - Persistence\u3002\n\nInitial Feature - Prefabbing \u662f\u7528\u4e8e\u6301\u4e45\u5316 GameObject \u7684\u5de5\u5177\uff0c\n\u5b83\u63d0\u4f9b\u4e86 PrefabbingPipeline \u6765\u5b9e\u73b0 GameObject \u7684\u6301\u4e45\u5316\u3002\n\u4e0e Unity \u7684\u9884\u5236\u4ef6\u7c7b\u4f3c\uff0c\u4f46\u652f\u6301\u8fd0\u884c\u65f6\u3002",
   "keywords": [
     "Initial",
     "Feature",
