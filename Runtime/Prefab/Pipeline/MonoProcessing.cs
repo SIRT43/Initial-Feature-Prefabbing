@@ -11,7 +11,7 @@ namespace FTGAMEStudio.InitialSolution.Prefabbing
         /// </summary>
         public static void FetchedWithMonos(MonoBehaviour[] monos, MonoInfo[] monoInfos)
         {
-            Dictionary<string, List<MonoBehaviour>> classifyMonos = ReflectionMacro.ClassifyWithUniqueName(monos);
+            Dictionary<string, List<MonoBehaviour>> classifyMonos = TypeUtilis.ClassifyWithUniqueName(monos);
             Dictionary<string, List<MonoInfo>> classifyMonoInfos = ExpressionProcessing.ClassifyExpressions(monoInfos);
 
             foreach (KeyValuePair<string, List<MonoBehaviour>> classifyMono in classifyMonos)

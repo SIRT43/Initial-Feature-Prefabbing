@@ -102,7 +102,7 @@ namespace FTGAMEStudio.InitialSolution.Prefabbing
         /// </summary>
         public static void FetchedWithEngines(Component[] engines, EngineInfo[] engineInfos, InquiryMachine<string, Type> containerTypes)
         {
-            Dictionary<string, List<Component>> classifyEngines = ReflectionMacro.ClassifyWithUniqueName(engines);
+            Dictionary<string, List<Component>> classifyEngines = TypeUtilis.ClassifyWithUniqueName(engines);
             Dictionary<string, List<EngineInfo>> classifyEngineInfos = ExpressionProcessing.ClassifyExpressions(engineInfos);
 
             foreach (KeyValuePair<string, List<Component>> classifyEngine in classifyEngines)
